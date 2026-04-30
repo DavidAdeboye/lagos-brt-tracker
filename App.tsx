@@ -46,7 +46,7 @@ export default function App() {
             },
           })}
         >
-          <Tab.Screen name="Map" component={MapScreen} options={{ title: "Transit Live" }} />
+          <Tab.Screen name="Map" component={MapScreen} options={{ title: "Transit" }} />
           <Tab.Screen name="Report" component={ReportScreen} options={{ title: "New Report" }} />
           <Tab.Screen name="Chat" component={ChatScreen} options={{ title: "AI Assistant" }} />
         </Tab.Navigator>
