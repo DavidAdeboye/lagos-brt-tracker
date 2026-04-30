@@ -2,8 +2,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur"; // The secret sauce
-import { StyleSheet } from "react-native";
 import MapScreen from "./screens/MapScreen";
 import ReportScreen from "./screens/ReportScreen";
 import ChatScreen from "./screens/ChatScreen";
@@ -15,30 +13,43 @@ export default function App() {
     <SafeAreaProvider>
       <NavigationContainer>
         <Tab.Navigator
-          screenOptions={({ route }) => ({
-            headerStyle: { backgroundColor: '#000' },
-            headerTitleStyle: { fontWeight: "800", color: "#fff", fontSize: 22 },
-            headerShadowVisible: false,
+          screenOptions={{
+            headerStyle: { 
+              backgroundColor: "#000",
+              borderBottomWidth: 0.5,
+              borderBottomColor: "#1C1C1E",
+            },
+            headerTitleStyle: { 
+              fontWeight: "800", 
+              color: "#fff", 
+              fontSize: 20 
+            },
             tabBarStyle: { 
-              backgroundColor: '#000', 
+              backgroundColor: "#000", 
               borderTopWidth: 0.5, 
-              borderTopColor: '#1C1C1E',
-              height: 90 
+              borderTopColor: "#1C1C1E",
+              height: 90,
+              paddingBottom: 30
             },
             tabBarActiveTintColor: "#00D2D3",
             tabBarInactiveTintColor: "#8E8E93",
-            tabBarIcon: ({ color, size }) => {
-              let iconName;
-              if (route.name === "Map") iconName = "map";
-              else if (route.name === "Report") iconName = "add-circle";
-              else iconName = "chatbubble-ellipses";
-              return <Ionicons name={iconName as any} size={size} color={color} />;
-            },
-          })}
+          }}
         >
-          <Tab.Screen name="Map" component={MapScreen} options={{ title: "Transit" }} />
-          <Tab.Screen name="Report" component={ReportScreen} options={{ title: "New Report" }} />
-          <Tab.Screen name="Chat" component={ChatScreen} options={{ title: "AI Assistant" }} />
+          <Tab.Screen 
+            name="Map" 
+            component={MapScreen} 
+            options={{ tabBarIcon: ({color}) => <Ionicons name="map" size={24} color={color} /> }} 
+          />
+          <Tab.Screen 
+            name="Report" 
+            component={ReportScreen} 
+            options={{ tabBarIcon: ({color}) => <Ionicons name="add-circle" size={24} color={color} /> }} 
+          />
+          <Tab.Screen 
+            name="Chat" 
+            component={ChatScreen} 
+            options={{ tabBarIcon: ({color}) => <Ionicons name="chatbubble-ellipses" size={24} color={color} /> }} 
+          />
         </Tab.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

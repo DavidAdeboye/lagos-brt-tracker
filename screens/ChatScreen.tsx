@@ -9,7 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { askAI } from "../config/ai";
 import { BRT_ROUTES } from "../constants/routes";
 
-const SYSTEM_PROMPT = `You are a Lagos BRT bus assistant. You help commuters navigate Lagos using the BRT system.
+const SYSTEM_PROMPT = `You are a Lagos BRT bus assistant. Current time: ${new Date().toLocaleTimeString("en-NG", { timeZone: "Africa/Lagos" })}. You help commuters navigate Lagos using the BRT system.
 Available routes: ${JSON.stringify(BRT_ROUTES.map(r => ({ name: r.name, stops: r.stops.map(s => s.name) })))}
 Be concise, friendly, and practical. Answer in plain text, no markdown.`;
 
