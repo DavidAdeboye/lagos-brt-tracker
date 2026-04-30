@@ -1,10 +1,23 @@
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Dimensions } from "react-native";
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Dimensions, TouchableOpacity } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../lib/supabase";
 import { BRT_ROUTES } from "../constants/routes";
 import { getETA } from "../lib/eta";
+
+const mapStyle = [
+  { "elementType": "geometry", "stylers": [{ "color": "#212121" }] },
+  { "elementType": "geometry.stroke", "stylers": [{ "color": "#212121" }] },
+  { "elementType": "labels.text.fill", "stylers": [{ "color": "#757575" }] },
+  { "elementType": "labels.text.stroke", "stylers": [{ "color": "#212121" }] },
+  { "featureType": "road", "elementType": "geometry", "stylers": [{ "color": "#2c2c2c" }] },
+  { "featureType": "road", "elementType": "geometry.stroke", "stylers": [{ "color": "#2c2c2c" }] },
+  { "featureType": "road", "elementType": "labels.text.fill", "stylers": [{ "color": "#9e9e9e" }] },
+  { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#000000" }] },
+  { "featureType": "water", "elementType": "labels.text.fill", "stylers": [{ "color": "#3f3f3f" }] },
+];
 
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
@@ -29,70 +42,71 @@ export default function MapScreen() {
   return (
     <View style={styles.container}>
       <MapView
-        style={StyleSheet.absoluteFillObject}
-        userInterfaceStyle="dark"
-        initialRegion={{ latitude: 6.5244, longitude: 3.3792, latitudeDelta: 0.1, longitudeDelta: 0.1 }}
+        style={styles.map}
+        customMapStyle={mapStyle}
+        initialRegion={{ latitude: 6.5244, longitude: 3.3792, latitudeDelta: 0.05, longitudeDelta: 0.05 }}
       >
-        {BRT_ROUTES.map((route) => (
-          <View key={route.id}>
-            <Polyline coordinates={route.stops.map(s => ({ latitude: s.lat, longitude: s.lng }))} strokeColor={route.color} strokeWidth={3} />
-            {route.stops.map(stop => (
-              <Marker key={stop.id} coordinate={{ latitude: stop.lat, longitude: stop.lng }} pinColor={route.color} />
-            ))}
-          </View>
+        {BRT_ROUTES.map(route => (
+          <Marker key={route.id} coordinate={{ latitude: route.stops[0].lat, longitude: route.stops[0].lng }}>
+            <View style={[styles.customMarker, { backgroundColor: route.color }]}>
+              <Ionicons name="bus" size={12} color="white" />
+            </View>
+          </Marker>
         ))}
       </MapView>
 
-      {/* Top Padding for Header */}
-      <View style={{ height: insets.top + 50 }} />
-
-      <View style={styles.content}>
+      <View style={styles.floatingPanel}>
         <View style={styles.etaRow}>
-          {BRT_ROUTES.map(route => (
-            <View key={route.id} style={styles.etaCard}>
-              <Text style={[styles.routeTag, { backgroundColor: route.color }]}>{route.name.split(' ')[0]}</Text>
-              <Text style={styles.etaVal}>{etas[route.id] ?? '--'}m</Text>
+          {BRT_ROUTES.map(r => (
+            <View key={r.id} style={styles.etaCard}>
+              <Text style={styles.etaLabel}>{r.name.split(' ')[0]}</Text>
+              <Text style={styles.etaTime}>{loading ? "..." : etas[r.id] ?? '--'}m</Text> 
             </View>
           ))}
         </View>
 
-        <View style={styles.feedCard}>
-          <Text style={styles.sectionTitle}>Live Activity</Text>
-          {loading ? <ActivityIndicator color="#fff" /> : (
-            <FlatList
-              data={reports}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <View style={styles.reportRow}>
-                  <Text style={styles.reportIcon}>🚌</Text>
-                  <View>
-                    <Text style={styles.reportText}>{item.stop_name}</Text>
-                    <Text style={styles.reportSubtext}>{item.type} • {new Date(item.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</Text>
-                  </View>
-                </View>
-              )}
-            />
-          )}
-        </View>
+        <TouchableOpacity style={styles.liveActivityBtn}>
+          <View style={styles.pulseContainer}>
+            <View style={styles.pulse} />
+            <Ionicons name="navigate" size={20} color="#00D2D3" />
+          </View>
+          <View>
+            <Text style={styles.btnTitle}>Live Activity</Text>
+            <Text style={styles.btnSubtitle}>Track your saved Ikorodu route</Text>
+          </View>
+        </TouchableOpacity>
       </View>
-
-      {/* Bottom Padding for Tab Bar */}
-      <View style={{ height: insets.bottom + 80 }} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000" },
-  content: { flex: 1, paddingHorizontal: 16, justifyContent: 'flex-end' },
-  etaRow: { flexDirection: "row", gap: 10, marginBottom: 15 },
-  etaCard: { flex: 1, backgroundColor: "rgba(28, 28, 30, 0.9)", padding: 12, borderRadius: 20, alignItems: "center" },
-  routeTag: { fontSize: 10, fontWeight: 'bold', color: '#fff', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 5, marginBottom: 4, overflow: 'hidden' },
-  etaVal: { color: "#fff", fontSize: 18, fontWeight: "700" },
-  feedCard: { backgroundColor: "rgba(28, 28, 30, 0.9)", padding: 20, borderRadius: 24, marginBottom: 10 },
-  sectionTitle: { color: "#fff", fontSize: 17, fontWeight: "600", marginBottom: 15 },
-  reportRow: { flexDirection: "row", alignItems: "center" },
-  reportIcon: { fontSize: 22, marginRight: 12 },
-  reportText: { color: "#fff", fontSize: 15, fontWeight: '500' },
-  reportSubtext: { color: "#8E8E93", fontSize: 12 },
+  container: { flex: 1, backgroundColor: '#000' },
+  map: { flex: 1 },
+  customMarker: { padding: 5, borderRadius: 10, borderWidth: 2, borderColor: 'white' },
+  floatingPanel: { position: 'absolute', bottom: 100, width: '100%', padding: 16 },
+  etaRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+  etaCard: { flex: 1, backgroundColor: '#1C1C1E', padding: 12, borderRadius: 15, alignItems: 'center' },
+  etaLabel: { color: '#8E8E93', fontSize: 10, fontWeight: '600', marginBottom: 4 },
+  etaTime: { color: '#00D2D3', fontWeight: 'bold', fontSize: 16 },
+  liveActivityBtn: { 
+    backgroundColor: '#1C1C1E', 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    padding: 16, 
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#2C2C2E'
+  },
+  pulseContainer: { marginRight: 15, position: 'relative' },
+  pulse: { 
+    position: 'absolute', 
+    width: 30, 
+    height: 30, 
+    borderRadius: 15, 
+    backgroundColor: '#00D2D3', 
+    opacity: 0.3 
+  },
+  btnTitle: { color: 'white', fontWeight: '700', fontSize: 16 },
+  btnSubtitle: { color: '#8E8E93', fontSize: 12 },
 });

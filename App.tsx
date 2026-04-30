@@ -16,26 +16,16 @@ export default function App() {
       <NavigationContainer>
         <Tab.Navigator
           screenOptions={({ route }) => ({
-            headerTransparent: true,
-            headerBackground: () => (
-              <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
-            ),
-            headerTitleStyle: { 
-              fontWeight: "700", 
-              color: "#fff",
-              fontSize: 18 
-            },
-            tabBarBackground: () => (
-              <BlurView intensity={95} tint="dark" style={StyleSheet.absoluteFill} />
-            ),
+            headerStyle: { backgroundColor: '#000' },
+            headerTitleStyle: { fontWeight: "800", color: "#fff", fontSize: 22 },
+            headerShadowVisible: false,
             tabBarStyle: { 
-              position: "absolute", 
-              borderTopWidth: 0,
-              height: 90,
-              paddingBottom: 30,
-              backgroundColor: 'transparent',
+              backgroundColor: '#000', 
+              borderTopWidth: 0.5, 
+              borderTopColor: '#1C1C1E',
+              height: 90 
             },
-            tabBarActiveTintColor: "#FF3B30",
+            tabBarActiveTintColor: "#00D2D3",
             tabBarInactiveTintColor: "#8E8E93",
             tabBarIcon: ({ color, size }) => {
               let iconName;
