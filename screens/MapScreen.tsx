@@ -25,6 +25,7 @@ export default function MapScreen() {
 
   useEffect(() => {
     fetchReports();
+    getLocation();
 
     // real-time subscription restored
     const channel = supabase
@@ -71,6 +72,12 @@ export default function MapScreen() {
         style={styles.map}
         customMapStyle={mapStyle}
         initialRegion={{ latitude: 6.5244, longitude: 3.3792, latitudeDelta: 0.3, longitudeDelta: 0.3 }}
+        region={userLocation ? {
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        } : undefined}
       >
         {BRT_ROUTES.map((route) => (
           <View key={route.id}>
