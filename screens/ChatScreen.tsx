@@ -13,7 +13,7 @@ const SYSTEM_PROMPT = `You are a Lagos BRT bus assistant. Current time: ${new Da
 Available routes: ${JSON.stringify(BRT_ROUTES.map(r => ({ name: r.name, stops: r.stops.map(s => s.name) })))}
 Be concise, friendly, and practical. Answer in plain text, no markdown.`;
 
-const SUGGESTIONS = ["Traffic at TBS?", "Next Ikorodu bus?", "Fastest way to Yaba?"];
+const SUGGESTIONS = ["Traffic at TBS?", "Next Ikorodu bus?", "What is the fastest way to Yaba?"];
 
 type Message = { role: "user" | "assistant"; content: string };
 
