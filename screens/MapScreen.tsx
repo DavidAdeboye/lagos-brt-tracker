@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, RefreshControl } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
-import { supabase, activeReports } from "../lib/supabase";
+import { supabase, activeReports, getConsensusReports } from "../lib/supabase";
 import { BRT_ROUTES } from "../constants/routes";
 import { getETA } from "../lib/eta";
 import ReportCard from "../components/ReportCard";
@@ -19,6 +19,7 @@ const mapStyle = [
 export default function MapScreen() {
   const [reports, setReports] = useState<any[]>([]);
   const [etas, setEtas] = useState<Record<string, number | null>>({});
+  const [consensusReports, setConsensusReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [userLocation, setUserLocation] = useState<any>(null);
@@ -51,6 +52,9 @@ export default function MapScreen() {
       const eta = await getETA(route.id, lastStop.lat, lastStop.lng);
       setEtas((prev) => ({ ...prev, [route.id]: eta }));
     }
+
+    const confirmed = await getConsensusReports();
+    setConsensusReports(confirmed);
   }
 
   async function onRefresh() {
@@ -96,6 +100,18 @@ export default function MapScreen() {
           </View>
         ))}
       </MapView>
+
+      {/* Confirmed Alerts */}
+      {consensusReports.length > 0 && (
+        <View style={styles.alertBox}>
+          <Text style={styles.alertTitle}>⚠️ Confirmed Reports</Text>
+          {consensusReports.map((r, i) => (
+            <Text key={i} style={styles.alertText}>
+              🔴 {r.stop_name} — {r.type} (confirmed by multiple users)
+            </Text>
+          ))}
+        </View>
+      )}
 
       {/* ETA Cards */}
       <View style={styles.etaRow}>
@@ -145,4 +161,23 @@ const styles = StyleSheet.create({
   etaTime: { color: "#00D2D3", fontWeight: "bold", fontSize: 16 },
   feed: { flex: 1, paddingHorizontal: 12 },
   emptyText: { color: "#555", textAlign: "center", marginTop: 20 },
+  alertBox: {
+    backgroundColor: "#1C1C1E",
+    margin: 12,
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#FF453A",
+  },
+  alertTitle: {
+    color: "#FF453A",
+    fontWeight: "700",
+    fontSize: 13,
+    marginBottom: 8,
+  },
+  alertText: {
+    color: "#fff",
+    fontSize: 12,
+    marginBottom: 4,
+  },
 });
